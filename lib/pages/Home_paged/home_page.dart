@@ -1,7 +1,10 @@
 import 'dart:typed_data';
 
+import 'package:accountant/pages/Home_paged/user_pages.dart';
 import 'package:accountant/pages/data/transaction.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:image_picker/image_picker.dart';
@@ -150,7 +153,7 @@ class _HomePageState extends State<HomePage> {
                       SizedBox(height: 10),
                       SwitchListTile(
                         title: Text(
-                          isCredit ? "আমি পেয়েছি (জমা)" : "আমি দিয়েছি (খরচ)",
+                          isCredit ? "আমার কাছে পাবে" : "আমি টাকা পাবো",
                         ),
                         value: isCredit,
                         activeColor: Colors.green,
@@ -262,81 +265,86 @@ class _HomePageState extends State<HomePage> {
                           itemCount: transactions.length,
                           itemBuilder: (context, index) {
                             final item = transactions[index];
-                            return Card(
-                              elevation: 5,
-                              shadowColor: Colors.blue,
-                              color: Colors.teal.shade50,
-                              margin: EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 15,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                                side: BorderSide(
-                                  color: Color.fromARGB(99, 33, 149, 243),
-                                  width: 1,
+                            return GestureDetector(
+                              onTap: () {
+                                Get.offAll(() =>UserPages());
+                              },
+                              child: Card(
+                                elevation: 5,
+                                shadowColor: Colors.blue,
+                                color: Colors.teal.shade50,
+                                margin: EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 15,
                                 ),
-                              ),
-                              child: Padding(
-                                padding: EdgeInsets.all(10),
-                                child: Row(
-                                  children: [
-                                    CircleAvatar(
-                                      radius: 30,
-                                      backgroundColor:
-                                          item.isCradit
-                                              ? Colors.green
-                                              : Colors.red,
-                                      backgroundImage:
-                                          item.image != null
-                                              ? MemoryImage(item.image!)
-                                              : null,
-                                      child:
-                                          item.image == null
-                                              ? Icon(
-                                                item.isCradit
-                                                    ? Icons
-                                                        .arrow_upward_outlined
-                                                    : Icons
-                                                        .arrow_downward_outlined,
-                                                size: 30,
-                                              )
-                                              : null,
-                                    ),
-                                    SizedBox(width: 10),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            "Name: ${item.title}",
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                          Text(
-                                            "${item.date.day}-${item.date.month}-${item.date.year}",
-                                            style: TextStyle(
-                                              fontSize: 16,
-                                              color: Colors.black,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    Spacer(),
-                                    Text(
-                                      "Price ${item.amount}",
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        color:
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  side: BorderSide(
+                                    color: Color.fromARGB(99, 33, 149, 243),
+                                    width: 1,
+                                  ),
+                                ),
+                                child: Padding(
+                                  padding: EdgeInsets.all(10),
+                                  child: Row(
+                                    children: [
+                                      CircleAvatar(
+                                        radius: 30,
+                                        backgroundColor:
                                             item.isCradit
                                                 ? Colors.green
                                                 : Colors.red,
+                                        backgroundImage:
+                                            item.image != null
+                                                ? MemoryImage(item.image!)
+                                                : null,
+                                        child:
+                                            item.image == null
+                                                ? Icon(
+                                                  item.isCradit
+                                                      ? Icons
+                                                          .arrow_upward_outlined
+                                                      : Icons
+                                                          .arrow_downward_outlined,
+                                                  size: 30,
+                                                )
+                                                : null,
                                       ),
-                                    ),
-                                  ],
+                                      SizedBox(width: 10),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              "Name: ${item.title}",
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                            Text(
+                                              "${item.date.day}-${item.date.month}-${item.date.year}",
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                color: Colors.black,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Spacer(),
+                                      Text(
+                                        "Price ${item.amount}",
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          color:
+                                              item.isCradit
+                                                  ? Colors.green
+                                                  : Colors.red,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             );
