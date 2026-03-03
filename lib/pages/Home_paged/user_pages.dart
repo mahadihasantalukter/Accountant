@@ -126,18 +126,21 @@ class _UserPagesState extends State<UserPages> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(
-              "মুছে ফেলতে চান?",
-              style: TextStyle(color: Colors.black, fontSize: 16),
+            title: Center(
+              child: Text(
+                "লেনদেনটি কি মুছে ফেলতে চান?",
+                style: TextStyle(color: Colors.black, fontSize: 16),
+              ),
             ),
+
             content: Text(
-              "${data.title} এর এই লেনদেনটি কি চিরতরে মুছে ফেলতে চান",
+              "${data.title} এর এই লেনদেনটি কি চিরতরে মুছে ফেলতে চান?",
               style: TextStyle(color: Colors.black, fontSize: 16),
             ),
             actions: [
               ElevatedButton(
                 onPressed: () => Get.back(),
-                child: Text("না", style: TextStyle(color: Colors.grey)),
+                child: Text("না", style: TextStyle(color: Colors.black)),
               ),
               ElevatedButton(
                 onPressed: () async {
@@ -153,7 +156,7 @@ class _UserPagesState extends State<UserPages> {
                     colorText: Colors.white,
                   );
                 },
-                child: Text("হ্যাঁ", style: TextStyle(color: Colors.grey)),
+                child: Text("হ্যাঁ", style: TextStyle(color: Colors.black)),
               ),
             ],
           ),

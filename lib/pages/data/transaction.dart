@@ -7,17 +7,21 @@ class Transaction extends HiveObject {
   final String productname;
   final int phonenumber;
   final double amount;
+  
   bool isCradit; 
   final DateTime date;
   final Uint8List? image;
-  Transaction({
+  final double paidamount;
+  Transaction( {
     required this.productname,
     required this.isCradit,
     required this.title,
     required this.amount,
+    
     required this.date,
     required this.phonenumber,
     this.image,
+    required this.paidamount,
   });
 }
 
@@ -35,6 +39,8 @@ Transaction read(BinaryReader reader) {
     amount: (reader.read() as num? ?? 0.0).toDouble(), // নিরাপদ পড়ার পদ্ধতি
     date: DateTime.fromMillisecondsSinceEpoch(reader.read() as int? ?? DateTime.now().millisecondsSinceEpoch),
     image: reader.read() as Uint8List?,
+    // নিচের লাইনটি চেক করবে ডাটা আছে কি না, না থাকলে ০.০ বসাবে
+    paidamount: reader.availableBytes > 0 ? (reader.read() as num? ?? 0.0).toDouble() : 0.0,
   );
 }
 
@@ -47,5 +53,6 @@ void write(BinaryWriter writer, Transaction obj) {
   writer.write(obj.amount);
   writer.write(obj.date.millisecondsSinceEpoch);
   writer.write(obj.image);
+  writer.write(obj.paidamount);
 }
 }

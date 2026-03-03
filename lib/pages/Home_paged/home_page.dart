@@ -39,6 +39,7 @@ class _HomePageState extends State<HomePage> {
   void addTransaction(
     String title,
     double amount,
+    double paidamount,
     bool isCredit,
     int phonenumber,
     String productname,
@@ -47,6 +48,7 @@ class _HomePageState extends State<HomePage> {
     final newentery = Transaction(
       title: title,
       amount: amount,
+      paidamount: paidamount,
       phonenumber: phonenumber,
       productname: productname,
       isCradit: isCredit,
@@ -62,8 +64,9 @@ class _HomePageState extends State<HomePage> {
     final phoneController = TextEditingController();
     final productController = TextEditingController();
     final amountController = TextEditingController();
-
-    bool isCredit = true;
+    final paidamoutController = TextEditingController();
+    double balance = 0;
+    bool isCredit = false;
 
     showDialog(
       context: context,
@@ -78,11 +81,12 @@ class _HomePageState extends State<HomePage> {
                     style: TextStyle(color: Colors.black, fontSize: 16),
                   ),
                 ),
-                
+
                 content: SingleChildScrollView(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      SizedBox(height: 13),
                       TextField(
                         controller: nameController,
                         decoration: InputDecoration(
@@ -106,7 +110,10 @@ class _HomePageState extends State<HomePage> {
                           labelText: "ফোন নাম্বার",
                           fillColor: Colors.white54,
                           hintStyle: TextStyle(color: Colors.black),
-                          prefixIcon: Icon(Icons.person, color: Colors.black),
+                          prefixIcon: Icon(
+                            Icons.phone_outlined,
+                            color: Colors.black,
+                          ),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(24),
                           ),
@@ -115,6 +122,7 @@ class _HomePageState extends State<HomePage> {
                             vertical: 16,
                           ),
                         ),
+                        keyboardType: TextInputType.number,
                       ),
                       SizedBox(height: 16),
                       TextField(
@@ -123,7 +131,10 @@ class _HomePageState extends State<HomePage> {
                           labelText: "পণ্যের নাম",
                           fillColor: Colors.white54,
                           hintStyle: TextStyle(color: Colors.black),
-                          prefixIcon: Icon(Icons.person, color: Colors.black),
+                          prefixIcon: Icon(
+                            Icons.production_quantity_limits,
+                            color: Colors.black,
+                          ),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(24),
                           ),
@@ -136,11 +147,15 @@ class _HomePageState extends State<HomePage> {
                       SizedBox(height: 16),
                       TextField(
                         controller: amountController,
+
                         decoration: InputDecoration(
-                          labelText: "বিলের পরিমান",
+                          labelText: "মোট টাকা",
                           fillColor: Colors.white54,
                           hintStyle: TextStyle(color: Colors.black),
-                          prefixIcon: Icon(Icons.person, color: Colors.black),
+                          prefixIcon: Icon(
+                            Icons.attach_money,
+                            color: Colors.black,
+                          ),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(24),
                           ),
@@ -149,6 +164,29 @@ class _HomePageState extends State<HomePage> {
                             vertical: 16,
                           ),
                         ),
+                        keyboardType: TextInputType.number,
+                      ),
+                      SizedBox(height: 16),
+                      TextField(
+                        controller: paidamoutController,
+
+                        decoration: InputDecoration(
+                          labelText: "টাকা দিয়েছেন",
+                          fillColor: Colors.white54,
+                          hintStyle: TextStyle(color: Colors.black),
+                          prefixIcon: Icon(
+                            Icons.attach_money,
+                            color: Colors.black,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 16,
+                          ),
+                        ),
+                        keyboardType: TextInputType.number,
                       ),
                       SizedBox(height: 10),
                       SwitchListTile(
@@ -186,9 +224,13 @@ class _HomePageState extends State<HomePage> {
                         onPressed: () {
                           if (nameController.text.isNotEmpty &&
                               amountController.text.isNotEmpty) {
+                            double pAmount =
+                                double.tryParse(paidamoutController.text) ??
+                                0.0;
                             addTransaction(
                               nameController.text,
                               double.tryParse(amountController.text) ?? 0.0,
+                              pAmount,
                               isCredit,
                               int.tryParse(phoneController.text) ?? 0,
                               productController.text,
@@ -214,25 +256,34 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(title: Text('হিসাবরক্ষক'), centerTitle: true),
       body: ValueListenableBuilder(
         valueListenable: box.listenable(),
         builder: (context, Box<Transaction> box, _) {
-          // হিসাব নিকেশ
           double totalIn = 0;
           double totalOut = 0;
           for (var item in box.values) {
-            if (item.isCradit)
-              totalIn += item.amount;
-            else
-              totalOut += item.amount;
+            double balance = item.amount - item.paidamount;
+            if (item.isCradit) {
+              if (balance >= 0) {
+                totalIn += balance;
+              } else {
+                totalOut += balance.abs();
+              }
+            } else {
+              if (balance >= 0) {
+                totalOut += balance;
+              } else {
+                totalIn += balance.abs();
+              }
+            }
           }
 
           final transactions = box.values.toList().reversed.toList();
 
           return Column(
             children: [
-              // সামারি কার্ড
               Container(
                 padding: EdgeInsets.all(20),
                 decoration: BoxDecoration(
@@ -242,8 +293,17 @@ class _HomePageState extends State<HomePage> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    summaryCard("মোট দেবো", "৳ $totalIn", Colors.green),
-                    summaryCard("মোট পাবো", "৳ $totalOut", Colors.red),
+                    
+                    summaryCard(
+                      "মোট দেবো",
+                      "৳ ${totalIn.toStringAsFixed(0)}",
+                      Colors.green,
+                    ),
+                    summaryCard(
+                      "মোট পাবো",
+                      "৳ ${totalIn.toStringAsFixed(0)}",
+                      Colors.red,
+                    ),
                   ],
                 ),
               ),
@@ -265,6 +325,26 @@ class _HomePageState extends State<HomePage> {
                           itemCount: transactions.length,
                           itemBuilder: (context, index) {
                             final item = transactions[index];
+
+                            // ক্যালকুলেশন
+                            double balance = item.amount - item.paidamount;
+                            double displayAmount =
+                                balance.abs(); // মাইনাস চিহ্ন সরানোর জন্য
+
+                            String statusLabel = "";
+                            Color statusColor = Colors.black;
+
+                            if (item.isCradit) {
+                              statusLabel =
+                                  balance >= 0 ? "দেনা বাকি" : "বেশি দিয়েছি";
+                              statusColor =
+                                  balance >= 0 ? Colors.green : Colors.blue;
+                            } else {
+                              statusLabel =
+                                  balance >= 0 ? "পাওনা বাকি" : "বেশি দিয়েছে";
+                              statusColor =
+                                  balance >= 0 ? Colors.red : Colors.orange;
+                            }
                             return GestureDetector(
                               onTap: () {
                                 Get.offAll(() => UserPages(transaction: item));
@@ -336,8 +416,9 @@ class _HomePageState extends State<HomePage> {
                                         ),
                                       ),
                                       Spacer(),
+
                                       Text(
-                                        "Price ${item.amount}",
+                                        "Price ${displayAmount.toStringAsFixed(0)}",
                                         style: TextStyle(
                                           fontSize: 16,
                                           color:
