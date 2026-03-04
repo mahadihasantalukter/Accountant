@@ -264,18 +264,18 @@ class _HomePageState extends State<HomePage> {
           double totalIn = 0;
           double totalOut = 0;
           for (var item in box.values) {
-            double balance = item.amount - item.paidamount;
+            double blance = item.amount - item.paidamount;
             if (item.isCradit) {
-              if (balance >= 0) {
-                totalIn += balance;
+              if (blance >= 0) {
+                totalIn += blance;
               } else {
-                totalOut += balance.abs();
+                totalOut += blance.abs();
               }
             } else {
-              if (balance >= 0) {
-                totalOut += balance;
+              if (blance >= 0) {
+                totalIn += blance;
               } else {
-                totalIn += balance.abs();
+                totalOut += blance.abs();
               }
             }
           }
@@ -293,12 +293,12 @@ class _HomePageState extends State<HomePage> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    
                     summaryCard(
                       "মোট দেবো",
-                      "৳ ${totalIn.toStringAsFixed(0)}",
+                      "৳ ${totalOut.toStringAsFixed(0)}",
                       Colors.green,
                     ),
+                    SizedBox(width: 5),
                     summaryCard(
                       "মোট পাবো",
                       "৳ ${totalIn.toStringAsFixed(0)}",
@@ -328,8 +328,7 @@ class _HomePageState extends State<HomePage> {
 
                             // ক্যালকুলেশন
                             double balance = item.amount - item.paidamount;
-                            double displayAmount =
-                                balance.abs(); // মাইনাস চিহ্ন সরানোর জন্য
+                            double displayAmount = balance.abs();
 
                             String statusLabel = "";
                             Color statusColor = Colors.black;
@@ -448,35 +447,37 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget summaryCard(var title, var amount, Color color) {
-    return Card(
-      elevation: 10,
-      shadowColor: Colors.blue,
-      child: Container(
-        padding: EdgeInsets.all(30),
+    return Expanded(
+      child: Card(
+        elevation: 10,
+        shadowColor: Colors.blue,
+        child: Container(
+          padding: EdgeInsets.symmetric(vertical: 15, horizontal: 5),
 
-        decoration: BoxDecoration(
-          color: const Color.fromARGB(125, 255, 193, 7),
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Column(
-          children: [
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: color,
+          decoration: BoxDecoration(
+            color: const Color.fromARGB(125, 255, 193, 7),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Column(
+            children: [
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                ),
               ),
-            ),
-            Text(
-              amount,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: color,
+              Text(
+                amount,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
