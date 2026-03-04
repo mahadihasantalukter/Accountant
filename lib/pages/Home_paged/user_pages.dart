@@ -22,11 +22,57 @@ class _UserPagesState extends State<UserPages> {
         elevation: 15,
         leadingWidth: 200,
         actions: [
-          IconButton(
-            onPressed: () {
-              deleteTransaction(context, data);
-            },
-            icon: Icon(Icons.delete_forever_outlined, color: Colors.black),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextButton(
+                onPressed: () {},
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.symmetric(horizontal: 10),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.add_outlined, color: Colors.black),
+                    Text("add", style: TextStyle(color: Colors.black)),
+                  ],
+                ),
+              ),
+              TextButton(
+                onPressed: () {},
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.symmetric(horizontal: 10),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.edit_outlined, color: Colors.black),
+                    Text("edit", style: TextStyle(color: Colors.black)),
+                  ],
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  deleteTransaction(context, data);
+                },
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.symmetric(horizontal: 10),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.delete_outlined, color: Colors.red),
+                    Text("delete", style: TextStyle(color: Colors.red)),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
 
@@ -76,12 +122,14 @@ class _UserPagesState extends State<UserPages> {
                     style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                   ),
                 ),
+                SizedBox(width: 35),
                 Expanded(
                   child: Text(
                     "কেনা",
                     style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                   ),
                 ),
+
                 Expanded(
                   child: Text(
                     "পরিশোধ",
@@ -96,20 +144,43 @@ class _UserPagesState extends State<UserPages> {
             child: Row(
               children: [
                 Expanded(
-                  child: Text(
-                    data.title,
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                  child: Column(
+                    children: [
+                      Text(
+                        "পণ্যর নাম : ${data.productname}",
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        "+880${data.phonenumber.toString()}",
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        "Date : ${data.date.day}-${data.date.month}-${data.date.year}",
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                Expanded(
-                  child: Text(
-                    "+880${data.phonenumber.toString()}",
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                  ),
-                ),
+                SizedBox(width: 35),
                 Expanded(
                   child: Text(
                     data.amount.toString(),
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                SizedBox(width: 20),
+                Expanded(
+                  child: Text(
+                    data.paidamount.toString(),
                     style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                   ),
                 ),
