@@ -287,6 +287,7 @@ class _HomePageState extends State<HomePage> {
           final transactions = box.values.toList().reversed.toList();
 
           return Container(
+            
             color: Colors.white,
             height: double.infinity,
             width: double.infinity,
@@ -317,6 +318,7 @@ class _HomePageState extends State<HomePage> {
                 ),
             
                 Padding(
+                  
                   padding: EdgeInsets.all(10),
             
                   child: Text(
@@ -327,6 +329,7 @@ class _HomePageState extends State<HomePage> {
             
                 // লিস্ট ভিউ
                 Expanded(
+                  
                   child:
                       transactions.isEmpty
                           ? Center(child: Text("কোনো হিসাব নেই!"))
@@ -354,10 +357,12 @@ class _HomePageState extends State<HomePage> {
                                     balance >= 0 ? Colors.red : Colors.orange;
                               }
                               return GestureDetector(
+                                
                                 onTap: () {
                                   Get.offAll(() => UserPages(transaction: item));
                                 },
                                 child: Card(
+                                  
                                   elevation: 5,
                                   shadowColor: Colors.blue,
                                   color: Colors.teal.shade50,
@@ -374,6 +379,7 @@ class _HomePageState extends State<HomePage> {
                                     ),
                                   ),
                                   child: Padding(
+                                    
                                     padding: EdgeInsets.all(10),
                                     child: Row(
                                       children: [

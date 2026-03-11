@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 class UserPages extends StatefulWidget {
   final Transaction transaction;
@@ -14,6 +15,22 @@ class UserPages extends StatefulWidget {
 }
 
 class _UserPagesState extends State<UserPages> {
+  late Box<Transaction> box;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    box = Hive.box<Transaction>('tally_box');
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    amountController.dispose();
+    paidamountController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final data = widget.transaction;
@@ -26,7 +43,9 @@ class _UserPagesState extends State<UserPages> {
             mainAxisSize: MainAxisSize.min,
             children: [
               TextButton(
-                onPressed: () {},
+                onPressed: () {
+                  updateTransaction(context, data);
+                },
                 style: TextButton.styleFrom(
                   padding: EdgeInsets.symmetric(horizontal: 10),
                   minimumSize: Size.zero,
@@ -40,23 +59,7 @@ class _UserPagesState extends State<UserPages> {
                   ],
                 ),
               ),
-              TextButton(
-                onPressed: () {
-                  updateTransaction(context, data);
-                },
-                style: TextButton.styleFrom(
-                  padding: EdgeInsets.symmetric(horizontal: 10),
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.edit_outlined, color: Colors.black),
-                    Text("edit", style: TextStyle(color: Colors.black)),
-                  ],
-                ),
-              ),
+
               TextButton(
                 onPressed: () {
                   deleteTransaction(context, data);
@@ -111,89 +114,57 @@ class _UserPagesState extends State<UserPages> {
           ],
         ),
       ),
-      body: Column(
-        children: [
-          Container(
-            color: data.isCradit ? Colors.green : Colors.red,
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    "লেনদেনের বিবরণ",
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                  ),
-                ),
-                SizedBox(width: 35),
-                Expanded(
-                  child: Text(
-                    "কেনা",
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                  ),
-                ),
+      body: ValueListenableBuilder(
+        valueListenable: box.listenable(),
+        builder: (context, Box<Transaction> box, _) {
+          double balnce = data.amount - data.paidamount;
 
-                Expanded(
-                  child: Text(
-                    "পরিশোধ",
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Row(
+          bool isCredit = data.isCradit;
+          return Container(
+            color: Colors.white,
+            height: double.infinity,
+            width: double.infinity,
+            child: Column(
               children: [
-                Expanded(
-                  child: Column(
+                Container(
+                  padding: EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        "পণ্যর নাম : ${data.productname}",
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      _summarycard(
+                        "সর্বমোট টাকা",
+
+                        data.amount.toString(),
+                        Colors.black,
                       ),
-                      Text(
-                        "+880${data.phonenumber.toString()}",
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      _summarycard(
+                        " টাকা দিয়েছে",
+                        data.paidamount.toString(),
+                        Colors.red,
                       ),
-                      Text(
-                        "Date : ${data.date.day}-${data.date.month}-${data.date.year}",
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      _summarycard(
+                        isCredit ? "টাকা পাবে " : "টাকা দিবে",
+                        balnce.abs().toString(),
+                        balnce >= 0 ? Colors.black : Colors.red,
                       ),
                     ],
                   ),
                 ),
-                SizedBox(width: 35),
-                Expanded(
-                  child: Text(
-                    data.amount.toString(),
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                  ),
-                ),
-                SizedBox(width: 20),
-                Expanded(
-                  child: Text(
-                    data.paidamount.toString(),
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                  ),
-                ),
+                Text(data.amount.toString()),
+                Text(data.paidamount.toString()),
               ],
             ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
 
+  // delete condition
   void deleteTransaction(BuildContext context, Transaction data) {
     showDialog(
       context: context,
@@ -236,6 +207,7 @@ class _UserPagesState extends State<UserPages> {
     );
   }
 
+  // update condition
   void updateTransaction(BuildContext context, Transaction data) {
     showDialog(
       context: context,
@@ -275,4 +247,40 @@ class _UserPagesState extends State<UserPages> {
 
   TextEditingController amountController = TextEditingController();
   TextEditingController paidamountController = TextEditingController();
+}
+
+Widget _summarycard(var title, var amount, Color color) {
+  return Expanded(
+    child: Card(
+      elevation: 5,
+      shadowColor: Colors.blue,
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: 15, horizontal: 5),
+        decoration: BoxDecoration(
+          color: Colors.teal.shade50,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Column(
+          children: [
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
+            ),
+            Text(
+              amount,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
 }
