@@ -36,6 +36,9 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+
+
+
   void addTransaction(
     String title,
     double amount,
@@ -287,7 +290,6 @@ class _HomePageState extends State<HomePage> {
           final transactions = box.values.toList().reversed.toList();
 
           return Container(
-            
             color: Colors.white,
             height: double.infinity,
             width: double.infinity,
@@ -316,35 +318,35 @@ class _HomePageState extends State<HomePage> {
                     ],
                   ),
                 ),
-            
+
                 Padding(
-                  
                   padding: EdgeInsets.all(10),
-            
+
                   child: Text(
                     "কাস্টমার লিস্ট",
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                 ),
-            
+
                 // লিস্ট ভিউ
                 Expanded(
-                  
                   child:
                       transactions.isEmpty
                           ? Center(child: Text("কোনো হিসাব নেই!"))
-                          : ListView.builder(
+                          : ListView.separated(
+                            separatorBuilder:
+                                (context, index) => SizedBox(height: 8),
                             itemCount: transactions.length,
                             itemBuilder: (context, index) {
                               final item = transactions[index];
-            
+
                               // ক্যালকুলেশন
                               double balance = item.amount - item.paidamount;
                               double displayAmount = balance.abs();
-            
+
                               String statusLabel = "";
                               Color statusColor = Colors.black;
-            
+
                               if (item.isCradit) {
                                 statusLabel =
                                     balance >= 0 ? "দেনা বাকি" : "বেশি দিয়েছি";
@@ -357,29 +359,28 @@ class _HomePageState extends State<HomePage> {
                                     balance >= 0 ? Colors.red : Colors.orange;
                               }
                               return GestureDetector(
-                                
                                 onTap: () {
-                                  Get.offAll(() => UserPages(transaction: item));
+                                  Get.offAll(
+                                    () => UserPages(transaction: item),
+                                  );
                                 },
                                 child: Card(
-                                  
                                   elevation: 5,
                                   shadowColor: Colors.blue,
                                   color: Colors.teal.shade50,
-                                  
+
                                   margin: EdgeInsets.symmetric(
                                     horizontal: 10,
-                                    vertical: 15,
+                                    vertical: 1,
                                   ),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(10),
                                     side: BorderSide(
-                                      color: Color.fromARGB(99, 33, 149, 243),
+                                      color: Color.fromARGB(98, 3, 6, 8),
                                       width: 1,
                                     ),
                                   ),
                                   child: Padding(
-                                    
                                     padding: EdgeInsets.all(10),
                                     child: Row(
                                       children: [
@@ -403,7 +404,8 @@ class _HomePageState extends State<HomePage> {
                                                     style: TextStyle(
                                                       color: Colors.white,
                                                       fontSize: 24,
-                                                      fontWeight: FontWeight.bold,
+                                                      fontWeight:
+                                                          FontWeight.bold,
                                                     ),
                                                   )
                                                   : null,
@@ -421,7 +423,7 @@ class _HomePageState extends State<HomePage> {
                                                 ),
                                               ),
                                               Text(
-                                                "${item.date.day}-${item.date.month}-${item.date.year}",
+                                                "${item.date.day}/${item.date.month}/${item.date.year}",
                                                 style: TextStyle(
                                                   fontSize: 16,
                                                   color: Colors.black,
@@ -431,7 +433,7 @@ class _HomePageState extends State<HomePage> {
                                           ),
                                         ),
                                         Spacer(),
-            
+
                                         Text(
                                           "Price ${displayAmount.toStringAsFixed(0)}",
                                           style: TextStyle(
