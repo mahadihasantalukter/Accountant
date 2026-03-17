@@ -1,4 +1,5 @@
 import 'package:accountant/pages/Home_paged/home_page.dart';
+import 'package:accountant/pages/data/customer.dart';
 import 'package:accountant/pages/data/transaction.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -16,11 +17,34 @@ class UserPages extends StatefulWidget {
 }
 
 class _UserPagesState extends State<UserPages> {
+  final box = Hive.box<Customer>('customer_box');
+
+  void additem(
+    String title,
+    String productname,
+    double totalamount,
+    double paidamountin,
+    bool isCredit,
+  ) {
+    final newentery = Customer(
+      title: title,
+      productname: productname,
+      amounta: totalamount,
+      paidamount: paidamountin,
+      isCradit: isCredit,
+      date: DateTime.now(),
+    );
+    box.add(newentery);
+  }
+
   @override
   Widget build(BuildContext context) {
     final data = widget.transaction;
-    final isCredit = data.isCradit;
+
+    final isCredite = data.isCradit;
     var balance = (data.amount - data.paidamount);
+    double taka = 0.0;
+    bool isCradit = false;
 
     return Scaffold(
       appBar: AppBar(
@@ -33,7 +57,7 @@ class _UserPagesState extends State<UserPages> {
             children: [
               TextButton(
                 onPressed: () {
-                  updateTransaction(context, data);
+                  addTransaction(context, data);
                 },
                 style: TextButton.styleFrom(
                   padding: EdgeInsets.symmetric(horizontal: 10),
@@ -80,7 +104,7 @@ class _UserPagesState extends State<UserPages> {
             ),
             CircleAvatar(
               radius: 18,
-              backgroundColor: isCredit ? Colors.green : Colors.red,
+              backgroundColor: isCredite ? Colors.green : Colors.red,
               backgroundImage:
                   data.image != null ? MemoryImage(data.image!) : null,
               child:
@@ -103,127 +127,69 @@ class _UserPagesState extends State<UserPages> {
           ],
         ),
       ),
-      body: Container(
-        color: Colors.white,
-        height: double.infinity,
-        width: double.infinity,
-        child: Column(
-          children: [
-            Container(
-              padding: EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _summarycard(
-                    "সর্বমোট টাকা",
+      body: ValueListenableBuilder(
+        valueListenable: box.listenable(),
+        builder: (context, Box<Customer> box, _) {
+          double amuntIn = 0;
+          double amuntOut = 0;
+        
+          final customerTransactions = box.values.where((item) => item.title == widget.transaction.title).toList();
+          for(var itemdata in customerTransactions){
+            double blance = itemdata.amounta - itemdata.paidamount;
+            if(itemdata.isCradit){
+              if(blance >= 0){
+                amuntIn += blance;
+              }else{
+                amuntOut += blance.abs();
+              }
+            }else{
+              if(blance >= 0){
+                amuntIn += blance;
+              }else{
+                amuntOut += blance.abs();
+              }
+            }
+          }
+          double currentBalance = amuntIn - amuntOut;
 
-                    data.amount.toString(),
-                    Colors.black,
+          return Container(
+            color: Colors.white,
+            height: double.infinity,
+            width: double.infinity,
+            child: Column(
+              children: [
+                Container(
+                  padding: EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  _summarycard(
-                    " টাকা দিয়েছে",
-                    data.paidamount.toString(),
-                    Colors.black,
-                  ),
-                  _summarycard(
-                    isCredit ? "টাকা পাবে " : "টাকা দিবে",
-                    balance.abs().toString(),
-                    isCredit ? Colors.green : Colors.red,
-                  ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: ListView.separated(
-                separatorBuilder: (context, index) => SizedBox(height: 10),
-                itemCount: data.history!.length,
-                itemBuilder: (context, index) {
-                  final item = data;
-                  return GestureDetector(
-                    onTap: () {},
-                    child: Card(
-                      elevation: 5,
-                      shadowColor: Colors.blue,
-                      color: Colors.teal.shade50,
-                      margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        side: BorderSide(color: Colors.black, width: 1),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      summarycard(
+                        "সর্বমোট টাকা",
+                        amuntIn.toString(),
+                        Colors.black,
                       ),
-                      child: Padding(
-                        padding: EdgeInsets.all(10),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    item.productname,
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  Text(
-                                    "+880${item.phonenumber}",
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.black,
-                                    ),
-                                  ),
-                                  Text(
-                                    "${item.date.day}/${item.date.month}/${item.date.year}",
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.black,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Expanded(
-                              child: Container(
-                                child: Center(
-                                  child: Text(
-                                    item.isCradit ? "টাকা পাবে" : "টাকা দিবে",
-                                  ),
-                                ),
-                              ),
-                            ),
-
-                            Column(
-                              children: [
-                                Text(
-                                  "মোট টাকা ${item.amount}",
-                                  style: TextStyle(fontSize: 16),
-                                ),
-                                Text(
-                                  " টাকা দিয়েছে ${item.paidamount}",
-                                  style: TextStyle(fontSize: 16),
-                                ),
-                                Text(
-                                  item.isCradit
-                                      ? "টাকা পাবে ${balance.abs()}"
-                                      : "টাকা দিবে ${balance.abs()}",
-                                  style: TextStyle(fontSize: 16),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
+                      summarycard(
+                        "টাকা দিয়েছে",
+                        amuntOut.toString(),
+                        Colors.black,
                       ),
-                    ),
-                  );
-                },
-              ),
+                      summarycard(
+                        currentBalance >= 0 ? "টাকা পাবে" : "টাকা দিবে",
+                        currentBalance.abs().toString(),
+                        currentBalance >= 0 ? Colors.green : Colors.red,
+                      ),
+                    ],
+                  ),
+                ),
+                Text(data.amount.toString(), style: TextStyle(fontSize: 20)),
+              ],
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
@@ -271,59 +237,195 @@ class _UserPagesState extends State<UserPages> {
     );
   }
 
-  // update condition
- void updateTransaction(BuildContext context, Transaction data) {
-  showDialog(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: Center(child: Text("টাকা জমা করুন")),
-      content: TextField(
-        controller: paidamountController, // আপনার তৈরি করা কন্ট্রোলার
-        keyboardType: TextInputType.number,
-        decoration: InputDecoration(
-          hintText: "টাকার পরিমাণ",
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-        ),
-      ),
-      actions: [
-        ElevatedButton(
-          onPressed: () => Get.back(),
-          child: Text("বাতিল"),
-        ),
-        ElevatedButton(
-          onPressed: () async {
-            if (paidamountController.text.isNotEmpty) {
-              double newAmount = double.parse(paidamountController.text);
+  void addTransaction(BuildContext context, Transaction data) {
+    bool localisCredit = false;
+    final productController = TextEditingController();
+    final noteController = TextEditingController();
+    final amountController = TextEditingController();
 
-              setState(() {
-                // মূল পেইড অ্যামাউন্ট আপডেট
-                data.amount += newAmount;
+    final paidamountController = TextEditingController();
 
-                // হিস্টোরিতে নতুন ডাটা যোগ
-                data.history ??= [];
-                data.history!.add({
-                  'amount': newAmount,
-                  'date': DateTime.now(),
-                });
-              });
+    showDialog(
+      context: context,
+      builder: (context) {
+        {
+          return StatefulBuilder(
+            builder: (context, setModalState) {
+              return AlertDialog(
+                title: Center(child: Text("নতুন লেনদেন তৈরি করুন")),
+                content: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Product name
+                      TextField(
+                        controller: productController,
 
-              await data.save(); // Hive-এ সেভ
-              paidamountController.clear();
-              Get.back();
-            }
-          },
-          child: Text("যোগ করুন"),
-        ),
-      ],
-    ),
-  );
+                        decoration: InputDecoration(
+                          labelText: "পণ্যের নাম",
+                          labelStyle: TextStyle(color: Colors.black),
+                          prefixIcon: Icon(
+                            Icons.production_quantity_limits,
+                            color: Colors.black,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 16,
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 10),
+
+                      SizedBox(height: 10),
+
+                      // Note
+                      TextField(
+                        controller: noteController,
+
+                        decoration: InputDecoration(
+                          labelText: "নোট লিখুন",
+                          labelStyle: TextStyle(color: Colors.black),
+                          prefixIcon: Icon(
+                            Icons.note_add_outlined,
+                            color: Colors.black,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 16,
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 10),
+
+                      TextField(
+                        controller: amountController,
+
+                        decoration: InputDecoration(
+                          labelText: "মোট টাকা",
+                          labelStyle: TextStyle(color: Colors.black),
+                          prefixIcon: Icon(
+                            Icons.attach_money_outlined,
+                            color: Colors.black,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 16,
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 10),
+
+                      // Amount
+                      TextField(
+                        controller: paidamountController,
+
+                        decoration: InputDecoration(
+                          labelText: "টাকা দিয়েছেন",
+                          labelStyle: TextStyle(color: Colors.black),
+                          prefixIcon: Icon(
+                            Icons.attach_money_outlined,
+                            color: Colors.black,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 16,
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 10),
+                      SwitchListTile(
+                        title: Text(
+                          localisCredit ? "আমার কাছে পাবে" : "আমি টাকা পাবো",
+                        ),
+                        value: localisCredit,
+                        activeColor: Colors.black,
+                        inactiveThumbColor: Colors.red,
+                        onChanged: (value) {
+                          setModalState(() {
+                            localisCredit = value;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                actions: [
+                  ElevatedButton(
+                    onPressed: () => Get.back(),
+                    child: Text("বাতিল"),
+                  ),
+                  ElevatedButton(
+                    onPressed: () async {
+                      // 1. Extract values from controllers
+                      String productName = productController.text.trim();
+                      String note =
+                          noteController.text
+                              .trim(); // You can use this for the title or a note field
+
+                      // 2. Parse amounts safely using tryParse (prevents crashes if input is not a number)
+                      double totalAmount =
+                          double.tryParse(amountController.text) ?? 0.0;
+                      double paidAmount =
+                          double.tryParse(paidamountController.text) ?? 0.0;
+
+                      // 3. Validation: Ensure product name and amount are provided
+                      if (productName.isEmpty ||
+                          amountController.text.isEmpty) {
+                        Get.snackbar(
+                          "ভুল হয়েছে",
+                          "দয়া করে পণ্যের নাম এবং মোট টাকা লিখুন",
+                          snackPosition: SnackPosition.BOTTOM,
+                          backgroundColor: Colors.red,
+                          colorText: Colors.white,
+                        );
+                        return;
+                      }
+                      additem(
+                        data.title,
+                        productName,
+                        totalAmount,
+                        paidAmount,
+                        localisCredit,
+                      );
+
+                      // 5. Close the dialog
+                      Get.back();
+
+                      // 6. Optional: Show success message
+                      Get.snackbar(
+                        "সফল",
+                        "নতুন লেনদেন যোগ করা হয়েছে",
+                        snackPosition: SnackPosition.BOTTOM,
+                        backgroundColor: Colors.green,
+                        colorText: Colors.white,
+                      );
+                    },
+                    child: const Text("যোগ করুন"),
+                  ),
+                ],
+              );
+            },
+          );
+        }
+        ;
+      },
+    );
+  }
 }
 
-  TextEditingController amountController = TextEditingController();
-  TextEditingController paidamountController = TextEditingController();
-}
-
-Widget _summarycard(var title, var amount, Color color) {
+Widget summarycard(var title, var amount, Color color) {
   return Expanded(
     child: Card(
       elevation: 5,
@@ -345,7 +447,7 @@ Widget _summarycard(var title, var amount, Color color) {
               ),
             ),
             Text(
-              amount,
+              "৳ $amount",
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,

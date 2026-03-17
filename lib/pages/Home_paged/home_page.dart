@@ -26,7 +26,7 @@ class _HomePageState extends State<HomePage> {
     final XFile? image = await picker.pickImage(
       source: ImageSource.gallery,
       imageQuality: 50,
-    ); // কোয়ালিটি কমিয়ে রাখা ভালো
+    ); // কোয়ালিটি 
 
     if (image != null) {
       Uint8List bytes = await image.readAsBytes();

@@ -3,16 +3,16 @@ import 'dart:typed_data';
 import 'package:hive/hive.dart';
 
 class Transaction extends HiveObject {
-  final String title;
-  final String productname;
-  final int phonenumber;
+   String title;
+   String productname;
+   int phonenumber;
    double amount;
   
   bool isCradit; 
   final DateTime date;
   final Uint8List? image;
   final double paidamount;
-  List? history;
+  String note = "";
   Transaction( {
     required this.productname,
     required this.isCradit,
@@ -23,7 +23,7 @@ class Transaction extends HiveObject {
     required this.phonenumber,
     this.image,
     required this.paidamount,
-    this.history,
+    this.note = "",
   });
 }
 
@@ -43,7 +43,7 @@ Transaction read(BinaryReader reader) {
     image: reader.read() as Uint8List?,
     // নিচের লাইনটি চেক করবে ডাটা আছে কি না, না থাকলে ০.০ বসাবে
     paidamount: reader.availableBytes > 0 ? (reader.read() as num? ?? 0.0).toDouble() : 0.0,
-    history: reader.availableBytes > 0 ? reader.read() as List? : [],
+    note: reader.availableBytes > 0 ? reader.read() as String? ?? "" : "",
   );
 }
 
@@ -57,6 +57,6 @@ void write(BinaryWriter writer, Transaction obj) {
   writer.write(obj.date.millisecondsSinceEpoch);
   writer.write(obj.image);
   writer.write(obj.paidamount);
-  writer.write(obj.history);
+  writer.write(obj.note);
 }
 }
