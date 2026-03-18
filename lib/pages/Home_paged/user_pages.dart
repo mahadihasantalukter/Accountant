@@ -24,14 +24,14 @@ class _UserPagesState extends State<UserPages> {
     String productname,
     double totalamount,
     double paidamountin,
-    bool isCredit,
+    bool isCredita,
   ) {
     final newentery = Customer(
       title: title,
       productname: productname,
       amounta: totalamount,
       paidamount: paidamountin,
-      isCradit: isCredit,
+      isCradit: isCredita,
       date: DateTime.now(),
     );
     box.add(newentery);
@@ -47,6 +47,7 @@ class _UserPagesState extends State<UserPages> {
     bool isCradit = false;
 
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         backgroundColor: Colors.white,
 
@@ -127,30 +128,22 @@ class _UserPagesState extends State<UserPages> {
           ],
         ),
       ),
+
       body: ValueListenableBuilder(
         valueListenable: box.listenable(),
         builder: (context, Box<Customer> box, _) {
-          double amuntIn = 0;
-          double amuntOut = 0;
-        
-          final customerTransactions = box.values.where((item) => item.title == widget.transaction.title).toList();
-          for(var itemdata in customerTransactions){
-            double blance = itemdata.amounta - itemdata.paidamount;
-            if(itemdata.isCradit){
-              if(blance >= 0){
-                amuntIn += blance;
-              }else{
-                amuntOut += blance.abs();
-              }
-            }else{
-              if(blance >= 0){
-                amuntIn += blance;
-              }else{
-                amuntOut += blance.abs();
-              }
-            }
+          double totalAmount = 0;
+          double totalPaid = 0;
+
+          final customerTransactions =
+              box.values
+                  .where((item) => item.title == widget.transaction.title)
+                  .toList();
+          for (var itemdata in customerTransactions) {
+            totalAmount += itemdata.amounta;
+            totalPaid += itemdata.paidamount;
           }
-          double currentBalance = amuntIn - amuntOut;
+          double currentBalance = totalAmount - totalPaid;
 
           return Container(
             color: Colors.white,
@@ -169,23 +162,70 @@ class _UserPagesState extends State<UserPages> {
                     children: [
                       summarycard(
                         "সর্বমোট টাকা",
-                        amuntIn.toString(),
+                        totalAmount.toString(),
                         Colors.black,
                       ),
                       summarycard(
                         "টাকা দিয়েছে",
-                        amuntOut.toString(),
+                        totalPaid.toString(),
                         Colors.black,
                       ),
                       summarycard(
-                        currentBalance >= 0 ? "টাকা পাবে" : "টাকা দিবে",
+                        currentBalance >= 0 ? "টাকা দিবে" : "টাকা পাবে",
                         currentBalance.abs().toString(),
-                        currentBalance >= 0 ? Colors.green : Colors.red,
+                        currentBalance >= 0 ? Colors.red : Colors.black,
                       ),
                     ],
                   ),
                 ),
-                Text(data.amount.toString(), style: TextStyle(fontSize: 20)),
+
+                Expanded(
+                  child:
+                      customerTransactions.isEmpty
+                          ? Center(child: Text("কোনো লেনদেন পাওয়া যায়নি"))
+                          : ListView.separated(
+                            separatorBuilder:
+                                (context, index) => SizedBox(height: 8),
+                            itemCount: customerTransactions.length,
+                            itemBuilder: (context, index) {
+                              final alldata = customerTransactions[index];
+                              double balance =
+                                  alldata.amounta - alldata.paidamount;
+                              double balancea = balance.abs();
+                              return Card(
+                                margin: EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 1,
+                                ),
+                                child: ListTile(
+                                  title: Text(
+                                    customerTransactions[index].title,
+                                  ),
+                                  subtitle: Text(
+                                    customerTransactions[index].date.toString(),
+                                  ),
+                                  trailing: Column(
+                                    children: [
+                                      Text("মোট টাকা ${alldata.amounta}"),
+                                      Text("টাকা দিয়েছে ${alldata.paidamount}"),
+                                      Text(
+                                        alldata.isCradit
+                                            ? "টাকা পাবে ${balancea}"
+                                            : "টাকা দিবে ${balancea}",
+                                        style: TextStyle(
+                                          color:
+                                              alldata.isCradit
+                                                  ? Colors.black
+                                                  : Colors.red,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                ),
               ],
             ),
           );
@@ -219,15 +259,31 @@ class _UserPagesState extends State<UserPages> {
               ElevatedButton(
                 onPressed: () async {
                   await data.delete();
-                  Get.back();
-                  Get.back();
 
+                  // ২. Customer Box থেকে ওই কাস্টমারের সব এন্ট্রি খুঁজে বের করা
+                  final keysToDelete =
+                      box.keys.where((key) {
+                        final customer = box.get(key);
+                        return customer?.title == data.title;
+                      }).toList();
+
+                  // ৩. যদি কোনো সাব-লেনদেন থাকে তবে সেগুলো একবারে মুছে ফেলা
+                  if (keysToDelete.isNotEmpty) {
+                    await box.deleteAll(keysToDelete);
+                  }
+
+                  // ৪. ইউজারকে হোম পেজে পাঠিয়ে দেওয়া
+                  Get.offAll(() => HomePage());
+
+                  // ৫. একটি কনফার্মেশন মেসেজ দেখানো
                   Get.snackbar(
-                    "ডিলিট হয়েছে",
-                    "লেনদেনটি সফলভাবে মুছে ফেলা হয়েছে",
+                    "সফলভাবে মুছে ফেলা হয়েছে",
+                    "${data.title} এর ডাটাবেস এখন খালি।",
                     snackPosition: SnackPosition.BOTTOM,
-                    backgroundColor: Colors.black87,
+                    backgroundColor: Colors.redAccent,
                     colorText: Colors.white,
+                    margin: EdgeInsets.all(10),
+                    duration: Duration(seconds: 2),
                   );
                 },
                 child: Text("হ্যাঁ", style: TextStyle(color: Colors.black)),
@@ -257,7 +313,7 @@ class _UserPagesState extends State<UserPages> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      // Product name
+                      SizedBox(height: 10),
                       TextField(
                         controller: productController,
 
@@ -321,6 +377,7 @@ class _UserPagesState extends State<UserPages> {
                             vertical: 16,
                           ),
                         ),
+                        keyboardType: TextInputType.number,
                       ),
                       SizedBox(height: 10),
 
@@ -343,6 +400,7 @@ class _UserPagesState extends State<UserPages> {
                             vertical: 16,
                           ),
                         ),
+                        keyboardType: TextInputType.number,
                       ),
                       SizedBox(height: 10),
                       SwitchListTile(

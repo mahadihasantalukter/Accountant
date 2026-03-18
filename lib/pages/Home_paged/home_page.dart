@@ -26,7 +26,7 @@ class _HomePageState extends State<HomePage> {
     final XFile? image = await picker.pickImage(
       source: ImageSource.gallery,
       imageQuality: 50,
-    ); // কোয়ালিটি 
+    ); // কোয়ালিটি
 
     if (image != null) {
       Uint8List bytes = await image.readAsBytes();
@@ -35,9 +35,6 @@ class _HomePageState extends State<HomePage> {
       });
     }
   }
-
-
-
 
   void addTransaction(
     String title,
@@ -65,10 +62,7 @@ class _HomePageState extends State<HomePage> {
   void _showForm(BuildContext context) {
     final nameController = TextEditingController();
     final phoneController = TextEditingController();
-    final productController = TextEditingController();
-    final amountController = TextEditingController();
-    final paidamoutController = TextEditingController();
-    double balance = 0;
+
     bool isCredit = false;
 
     showDialog(
@@ -80,7 +74,7 @@ class _HomePageState extends State<HomePage> {
                 backgroundColor: Colors.white,
                 title: Center(
                   child: Text(
-                    "নতুন লেনদেন যোগ করুন",
+                    "নতুন কাস্টমার তৈরি করুন",
                     style: TextStyle(color: Colors.black, fontSize: 16),
                   ),
                 ),
@@ -128,84 +122,7 @@ class _HomePageState extends State<HomePage> {
                         keyboardType: TextInputType.number,
                       ),
                       SizedBox(height: 16),
-                      TextField(
-                        controller: productController,
-                        decoration: InputDecoration(
-                          labelText: "পণ্যের নাম",
-                          fillColor: Colors.white54,
-                          hintStyle: TextStyle(color: Colors.black),
-                          prefixIcon: Icon(
-                            Icons.production_quantity_limits,
-                            color: Colors.black,
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(24),
-                          ),
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: 24,
-                            vertical: 16,
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 16),
-                      TextField(
-                        controller: amountController,
 
-                        decoration: InputDecoration(
-                          labelText: "মোট টাকা",
-                          fillColor: Colors.white54,
-                          hintStyle: TextStyle(color: Colors.black),
-                          prefixIcon: Icon(
-                            Icons.attach_money,
-                            color: Colors.black,
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(24),
-                          ),
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: 24,
-                            vertical: 16,
-                          ),
-                        ),
-                        keyboardType: TextInputType.number,
-                      ),
-                      SizedBox(height: 16),
-                      TextField(
-                        controller: paidamoutController,
-
-                        decoration: InputDecoration(
-                          labelText: "টাকা দিয়েছেন",
-                          fillColor: Colors.white54,
-                          hintStyle: TextStyle(color: Colors.black),
-                          prefixIcon: Icon(
-                            Icons.attach_money,
-                            color: Colors.black,
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(24),
-                          ),
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: 24,
-                            vertical: 16,
-                          ),
-                        ),
-                        keyboardType: TextInputType.number,
-                      ),
-                      SizedBox(height: 10),
-                      SwitchListTile(
-                        title: Text(
-                          isCredit ? "আমার কাছে পাবে" : "আমি টাকা পাবো",
-                        ),
-                        value: isCredit,
-                        activeColor: Colors.green,
-                        inactiveThumbColor: Colors.red,
-                        onChanged: (value) {
-                          setModalState(() {
-                            isCredit = value;
-                          });
-                        },
-                      ),
-                      SizedBox(height: 10),
                       _selectedImageBytes != null
                           ? Image.memory(
                             _selectedImageBytes!,
@@ -226,17 +143,14 @@ class _HomePageState extends State<HomePage> {
                         ),
                         onPressed: () {
                           if (nameController.text.isNotEmpty &&
-                              amountController.text.isNotEmpty) {
-                            double pAmount =
-                                double.tryParse(paidamoutController.text) ??
-                                0.0;
+                              phoneController.text.isNotEmpty) {
                             addTransaction(
                               nameController.text,
-                              double.tryParse(amountController.text) ?? 0.0,
-                              pAmount,
+                              0,
+                              0,
                               isCredit,
-                              int.tryParse(phoneController.text) ?? 0,
-                              productController.text,
+                              int.parse(phoneController.text),
+                              '',
                               _selectedImageBytes,
                             );
                             Navigator.pop(context);
