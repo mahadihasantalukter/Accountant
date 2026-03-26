@@ -1,34 +1,28 @@
 import 'dart:typed_data';
-
 import 'package:accountant/pages/Home_paged/user_pages.dart';
 import 'package:accountant/pages/data/customer.dart';
 import 'package:accountant/pages/data/transaction.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:hive/hive.dart';
+
 import 'package:hive_flutter/adapters.dart';
 import 'package:image_picker/image_picker.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
-
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
   final box = Hive.box<Transaction>('tally_box');
-
   Uint8List? _selectedImageBytes; // ইমেজ ডাটা রাখার জন্য
-
   Future<void> _pickImage(StateSetter setModalState) async {
     final ImagePicker picker = ImagePicker();
     final XFile? image = await picker.pickImage(
       source: ImageSource.gallery,
       imageQuality: 50,
-    ); // কোয়ালিটি
-
+    );
     if (image != null) {
       Uint8List bytes = await image.readAsBytes();
       setModalState(() {
@@ -39,19 +33,13 @@ class _HomePageState extends State<HomePage> {
 
   void addTransaction(
     String title,
-    double amount,
-    double paidamount,
     bool isCredit,
     int phonenumber,
-    String productname,
     Uint8List? image,
   ) {
     final newentery = Transaction(
       title: title,
-      amount: amount,
-      paidamount: paidamount,
       phonenumber: phonenumber,
-      productname: productname,
       isCradit: isCredit,
       date: DateTime.now(),
       image: image,
@@ -63,9 +51,7 @@ class _HomePageState extends State<HomePage> {
   void _showForm(BuildContext context) {
     final nameController = TextEditingController();
     final phoneController = TextEditingController();
-
     bool isCredit = false;
-
     showDialog(
       context: context,
       builder:
@@ -147,18 +133,17 @@ class _HomePageState extends State<HomePage> {
                               phoneController.text.isNotEmpty) {
                             addTransaction(
                               nameController.text,
-                              0,
-                              0,
+
                               isCredit,
                               int.parse(phoneController.text),
-                              '',
+
                               _selectedImageBytes,
                             );
                             Navigator.pop(context);
                           }
                         },
                         child: Text(
-                          "হিসাব রাখুন",
+                          "কাস্টমার তৈরি করুন",
                           style: TextStyle(color: Colors.white),
                         ),
                       ),
@@ -184,17 +169,27 @@ class _HomePageState extends State<HomePage> {
         valueListenable: box.listenable(),
         builder: (context, Box<Transaction> box, _) {
           final Box<Customer> customerBox = Hive.box<Customer>('customer_box');
-          double totalIn = 0;
-          double totalOut = 0;
-          for (var customer in customerBox.values) {
-            var balance = customer.amounta - customer.paidamount;
-            if (balance > 0) {
-              totalIn += balance;
-            } else if (balance < 0) {
-              totalOut += balance.abs();
+
+          double totalpabo = 0;
+          double totaldebo = 0;
+          for (var transaction in box.values) {
+            double customerBalance = 0;
+            final relatedEntries = customerBox.values.where(
+              (c) => c.title == transaction.title,
+            );
+            double subTotalDibo = 0;
+            double subTotalPabo = 0;
+            for (var entry in relatedEntries) {
+              subTotalDibo += entry.amounta; 
+              subTotalPabo += entry.paidamount; 
+            }
+            customerBalance = subTotalDibo - subTotalPabo;
+            if (customerBalance > 0) {           
+              totalpabo += customerBalance;
+            } else if (customerBalance < 0) {   
+              totaldebo += customerBalance.abs();
             }
           }
-          double netBalance = totalIn - totalOut;
 
           final transactions = box.values.toList().reversed.toList();
 
@@ -214,14 +209,14 @@ class _HomePageState extends State<HomePage> {
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       summaryCard(
-                        "মোট দেবো",
-                        "৳ ${netBalance > 0 ? 0 : netBalance.abs().toStringAsFixed(0)}",
+                        "মোট পাবে",
+                        "৳ ${totaldebo.toStringAsFixed(0)}",
                         Colors.black,
                       ),
                       SizedBox(width: 5),
                       summaryCard(
                         "মোট পাবো",
-                        "৳ ${netBalance < 0 ? 0 : netBalance.abs().toStringAsFixed(0)}",
+                        "৳ ${totalpabo.toStringAsFixed(0)}",
                         Colors.red,
                       ),
                     ],
@@ -248,25 +243,13 @@ class _HomePageState extends State<HomePage> {
                             itemCount: transactions.length,
                             itemBuilder: (context, index) {
                               final item = transactions[index];
+                              Customer? customer;
+                              if (index < customerBox.length) {
+                                customer = customerBox.getAt(index);
+                              }
 
                               // ক্যালকুলেশন
-                              double balance = item.amount - item.paidamount;
-                              double displayAmount = balance.abs();
 
-                              String statusLabel = "";
-                              Color statusColor = Colors.black;
-
-                              if (item.isCradit) {
-                                statusLabel =
-                                    balance >= 0 ? "দেনা বাকি" : "বেশি দিয়েছি";
-                                statusColor =
-                                    balance >= 0 ? Colors.green : Colors.blue;
-                              } else {
-                                statusLabel =
-                                    balance >= 0 ? "পাওনা বাকি" : "বেশি দিয়েছে";
-                                statusColor =
-                                    balance >= 0 ? Colors.red : Colors.orange;
-                              }
                               return GestureDetector(
                                 onTap: () {
                                   Get.offAll(
@@ -344,7 +327,7 @@ class _HomePageState extends State<HomePage> {
                                         Spacer(),
 
                                         Text(
-                                          "Price ${displayAmount.toStringAsFixed(0)}",
+                                          "price ",
                                           style: TextStyle(
                                             fontSize: 16,
                                             color:

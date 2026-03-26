@@ -1,5 +1,6 @@
 import 'package:accountant/pages/Home_paged/home_page.dart';
 import 'package:accountant/pages/data/customer.dart';
+
 import 'package:accountant/pages/data/transaction.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
@@ -10,9 +11,11 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
   Hive.registerAdapter(TransactionAdapter());
-  Hive.registerAdapter(CustomerAdapter());
+  Hive .registerAdapter(CustomerAdapter());
+  
   await Hive.openBox<Transaction>('tally_box');
   await Hive.openBox<Customer>('customer_box');
+  
   runApp(const MyApp());
 }
 

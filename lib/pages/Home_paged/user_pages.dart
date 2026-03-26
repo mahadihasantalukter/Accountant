@@ -42,7 +42,7 @@ class _UserPagesState extends State<UserPages> {
     final data = widget.transaction;
 
     final isCredite = data.isCradit;
-    var balance = (data.amount - data.paidamount);
+
     double taka = 0.0;
     bool isCradit = false;
 
@@ -132,18 +132,18 @@ class _UserPagesState extends State<UserPages> {
       body: ValueListenableBuilder(
         valueListenable: box.listenable(),
         builder: (context, Box<Customer> box, _) {
-          double totalAmount = 0;
-          double totalPaid = 0;
+          double totalpabo = 0;
+          double totaldibo = 0;
 
           final customerTransactions =
               box.values
                   .where((item) => item.title == widget.transaction.title)
                   .toList();
-          for (var itemdata in customerTransactions) {
-            totalAmount += itemdata.amounta;
-            totalPaid += itemdata.paidamount;
+          for (var item in customerTransactions) {
+            totalpabo += item.paidamount;
+            totaldibo += item.amounta;
           }
-          double currentBalance = totalAmount - totalPaid;
+          double totaltaka = totaldibo - totalpabo;
 
           return Container(
             color: Colors.white,
@@ -161,19 +161,9 @@ class _UserPagesState extends State<UserPages> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       summarycard(
-                        "সর্বমোট টাকা",
-                        totalAmount.toString(),
-                        Colors.black,
-                      ),
-                      summarycard(
-                        "টাকা দিয়েছে",
-                        totalPaid.toString(),
-                        Colors.black,
-                      ),
-                      summarycard(
-                        currentBalance >= 0 ? "টাকা দিবে" : "টাকা পাবে",
-                        currentBalance.abs().toString(),
-                        currentBalance >= 0 ? Colors.red : Colors.black,
+                        totaltaka >= 0 ? "মোট পাবো" : "মোট পাবে",
+                        totaltaka.abs().toString(),
+                        totaltaka >= 0 ? Colors.red : Colors.black,
                       ),
                     ],
                   ),
@@ -211,7 +201,7 @@ class _UserPagesState extends State<UserPages> {
                                       Text(
                                         alldata.isCradit
                                             ? "টাকা পাবে ${balancea}"
-                                            : "টাকা দিবে ${balancea}",
+                                            : "টাকা পাবো ${balancea}",
                                         style: TextStyle(
                                           color:
                                               alldata.isCradit
