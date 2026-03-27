@@ -257,7 +257,7 @@ class _UserPagesState extends State<UserPages> {
                         return customer?.title == data.title;
                       }).toList();
 
-                  // ৩. যদি কোনো সাব-লেনদেন থাকে তবে সেগুলো একবারে মুছে ফেলা
+                   
                   if (keysToDelete.isNotEmpty) {
                     await box.deleteAll(keysToDelete);
                   }
@@ -324,9 +324,6 @@ class _UserPagesState extends State<UserPages> {
                         ),
                       ),
                       SizedBox(height: 10),
-
-                      SizedBox(height: 10),
-
                       // Note
                       TextField(
                         controller: noteController,

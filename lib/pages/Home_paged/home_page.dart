@@ -180,13 +180,13 @@ class _HomePageState extends State<HomePage> {
             double subTotalDibo = 0;
             double subTotalPabo = 0;
             for (var entry in relatedEntries) {
-              subTotalDibo += entry.amounta; 
-              subTotalPabo += entry.paidamount; 
+              subTotalDibo += entry.amounta;
+              subTotalPabo += entry.paidamount;
             }
             customerBalance = subTotalDibo - subTotalPabo;
-            if (customerBalance > 0) {           
+            if (customerBalance > 0) {
               totalpabo += customerBalance;
-            } else if (customerBalance < 0) {   
+            } else if (customerBalance < 0) {
               totaldebo += customerBalance.abs();
             }
           }
@@ -248,7 +248,17 @@ class _HomePageState extends State<HomePage> {
                                 customer = customerBox.getAt(index);
                               }
 
-                              // ক্যালকুলেশন
+                              final relatedEntries = customerBox.values.where(
+                                (c) => c.title == item.title,
+                              );
+                              double subTotalDibo = 0;
+                              double subTotalPabo = 0;
+                              for (var entry in relatedEntries) {
+                                subTotalDibo += entry.amounta;
+                                subTotalPabo += entry.paidamount;
+                              }
+                              double customerBalance =
+                                  subTotalDibo - subTotalPabo;
 
                               return GestureDetector(
                                 onTap: () {
@@ -326,15 +336,34 @@ class _HomePageState extends State<HomePage> {
                                         ),
                                         Spacer(),
 
-                                        Text(
-                                          "price ",
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            color:
-                                                item.isCradit
-                                                    ? Colors.black
-                                                    : Colors.red,
-                                          ),
+                                        Column(
+                                          children: [
+                                            Text(
+                                              customerBalance.isNegative
+                                                  ? "মোট পাবে"
+                                                  : "মোট পাবো",
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                color:
+                                                    customerBalance.isNegative
+                                                        ? Colors.black
+                                                        : Colors.red,
+                                              ),
+                                            ),
+                                            Text(
+                                              customerBalance.isNegative
+                                                  ? " ${customerBalance.abs().toString()}"
+                                                  : " ${customerBalance.abs().toString()}",
+
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                color:
+                                                    customerBalance.isNegative
+                                                        ? Colors.black
+                                                        : Colors.red,
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ],
                                     ),
