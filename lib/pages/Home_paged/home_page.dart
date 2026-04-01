@@ -339,15 +339,19 @@ class _HomePageState extends State<HomePage> {
                                         Column(
                                           children: [
                                             Text(
-                                              customerBalance.isNegative
-                                                  ? "মোট পাবে"
-                                                  : "মোট পাবো",
+                                              customerBalance == 0
+                                                  ? "সমান"
+                                                  : (customerBalance > 0
+                                                      ? "মোট পাবে"
+                                                      : "মোট পাবো"),
                                               style: TextStyle(
                                                 fontSize: 14,
                                                 color:
-                                                    customerBalance.isNegative
+                                                    customerBalance == 0
                                                         ? Colors.black
-                                                        : Colors.red,
+                                                        : (customerBalance > 0
+                                                            ? Colors.red
+                                                            : Colors.black),
                                               ),
                                             ),
                                             Text(
@@ -358,9 +362,11 @@ class _HomePageState extends State<HomePage> {
                                               style: TextStyle(
                                                 fontSize: 14,
                                                 color:
-                                                    customerBalance.isNegative
+                                                    customerBalance == 0
                                                         ? Colors.black
-                                                        : Colors.red,
+                                                        : (customerBalance > 0
+                                                            ? Colors.red
+                                                            : Colors.black),
                                               ),
                                             ),
                                           ],

@@ -11,6 +11,7 @@ analyzer:
   errors:
     unused_local_variable: ignore
     unnecessary_brace_in_string_interps: ignore
+    curly_braces_in_flow_control_structures: ignore
 include: package:flutter_lints/flutter.yaml
 
 linter:

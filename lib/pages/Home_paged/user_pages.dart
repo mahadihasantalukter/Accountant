@@ -1,4 +1,5 @@
 import 'package:accountant/pages/Home_paged/home_page.dart';
+import 'package:accountant/pages/Home_paged/user_details.dart';
 import 'package:accountant/pages/data/customer.dart';
 import 'package:accountant/pages/data/transaction.dart';
 import 'package:flutter/material.dart';
@@ -182,6 +183,18 @@ class _UserPagesState extends State<UserPages> {
                     ],
                   ),
                 ),
+                Padding(
+                  padding: EdgeInsets.only(top: 10),
+                  child: Text(
+                    "মোবাইল নাম্বার +880${data.phonenumber.toString()}",
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                SizedBox(height: 20),
 
                 Expanded(
                   child:
@@ -196,34 +209,46 @@ class _UserPagesState extends State<UserPages> {
                               double balance =
                                   alldata.amounta - alldata.paidamount;
                               double balancea = balance.abs();
-                              return Card(
-                                margin: EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 1,
-                                ),
-                                child: ListTile(
-                                  title: Text(
-                                    "পণ্যের নাম ${alldata.productname}",
+                              return GestureDetector(
+                                onTap: () {
+                                  Get.offAll(() => UserDetails(transaction: data, transaction2: alldata));
+                                },
+                                child: Card(
+                                  margin: EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 1,
                                   ),
-                                  subtitle: Text(
-                                    "${alldata.date.day}/${alldata.date.month}/${alldata.date.year}",
-                                  ),
-                                  trailing: Column(
-                                    children: [
-                                      Text("মোট টাকা ${alldata.amounta}"),
-                                      Text("টাকা দিয়েছে ${alldata.paidamount}"),
-                                      Text(
-                                        alldata.isCradit
-                                            ? "টাকা পাবে ${balancea}"
-                                            : "টাকা পাবো ${balancea}",
-                                        style: TextStyle(
-                                          color:
-                                              alldata.isCradit
-                                                  ? Colors.black
-                                                  : Colors.red,
+                                  child: ListTile(
+                                    title: Text(
+                                      "পণ্যের নাম ${alldata.productname}",
+                                    ),
+                                    subtitle: Text(
+                                      "${alldata.date.day}/${alldata.date.month}/${alldata.date.year}",
+                                    ),
+                                    trailing: Column(
+                                      children: [
+                                        Text("মোট টাকা ${alldata.amounta}"),
+                                        Text(
+                                          "মোট দিয়েছে ${alldata.paidamount}",
                                         ),
-                                      ),
-                                    ],
+                                        Text(
+                                          balance == 0
+                                              ? "পরিশোধ 0.0"
+                                              : (balance > 0
+                                                  ? "মোট পাবো ${balancea}"
+                                                  : "মোট পাবে ${balancea}"),
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color:
+                                                balance == 0
+                                                    ? Colors.black
+                                                    : (balance > 0
+                                                        ? Colors.red
+                                                        : Colors.blue),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               );
@@ -303,6 +328,7 @@ class _UserPagesState extends State<UserPages> {
     final amountController = TextEditingController();
 
     final paidamountController = TextEditingController();
+    String transactionType = "pabo";
 
     showDialog(
       context: context,
@@ -403,18 +429,75 @@ class _UserPagesState extends State<UserPages> {
                         keyboardType: TextInputType.number,
                       ),
                       SizedBox(height: 10),
-                      SwitchListTile(
-                        title: Text(
-                          localisCredit ? "আমার কাছে পাবে" : "আমি টাকা পাবো",
-                        ),
-                        value: localisCredit,
-                        activeColor: Colors.black,
-                        inactiveThumbColor: Colors.red,
-                        onChanged: (value) {
+                      SegmentedButton<String>(
+                        showSelectedIcon: false,
+                        segments: const [
+                          ButtonSegment(
+                            value: 'pabo',
+                            label: Text(
+                              'টাকা পাবো',
+                              style: TextStyle(fontSize: 13),
+                            ),
+                          ),
+                          ButtonSegment(
+                            value: 'dibo',
+                            label: Text(
+                              'টাকা পাবে',
+                              style: TextStyle(fontSize: 13),
+                            ),
+                          ),
+                          ButtonSegment(
+                            value: 'paid',
+                            label: Text(
+                              'পরিশোধ',
+                              style: TextStyle(fontSize: 13),
+                            ),
+                          ),
+                        ],
+                        selected: {transactionType},
+                        onSelectionChanged: (newSelection) {
                           setModalState(() {
-                            localisCredit = value;
+                            transactionType = newSelection.first;
                           });
                         },
+                        style: ButtonStyle(
+                          // ব্যাকগ্রাউন্ড কালার পরিবর্তন
+                          backgroundColor: WidgetStateProperty.resolveWith<
+                            Color
+                          >((states) {
+                            if (states.contains(WidgetState.selected)) {
+                              if (transactionType == 'pabo') return Colors.red;
+                              if (transactionType == 'dibo')
+                                return Colors.green;
+                              if (transactionType == 'paid') return Colors.blue;
+                            }
+                            return Colors.white; // ডিফল্ট সাদা
+                          }),
+
+                          // টেক্সট এবং আইকন কালার (ForegroundColor)
+                          foregroundColor:
+                              WidgetStateProperty.resolveWith<Color>((states) {
+                                if (states.contains(WidgetState.selected)) {
+                                  return Colors.white; // সিলেক্টেড অবস্থায় সাদা
+                                }
+                                return Colors.black; // নরমাল অবস্থায় কালো
+                              }),
+
+                          side: WidgetStateProperty.resolveWith<BorderSide>((
+                            states,
+                          ) {
+                            Color borderColor = Colors.grey;
+                            if (states.contains(WidgetState.selected)) {
+                              if (transactionType == 'pabo')
+                                borderColor = Colors.red;
+                              if (transactionType == 'dibo')
+                                borderColor = Colors.black;
+                              if (transactionType == 'paid')
+                                borderColor = Colors.blue;
+                            }
+                            return BorderSide(color: borderColor);
+                          }),
+                        ),
                       ),
                     ],
                   ),
@@ -426,19 +509,14 @@ class _UserPagesState extends State<UserPages> {
                   ),
                   ElevatedButton(
                     onPressed: () async {
-                      // 1. Extract values from controllers
                       String productName = productController.text.trim();
-                      String note =
-                          noteController.text
-                              .trim(); // You can use this for the title or a note field
+                      String note = noteController.text.trim();
 
-                      // 2. Parse amounts safely using tryParse (prevents crashes if input is not a number)
                       double totalAmount =
                           double.tryParse(amountController.text) ?? 0.0;
                       double paidAmount =
                           double.tryParse(paidamountController.text) ?? 0.0;
 
-                      // 3. Validation: Ensure product name and amount are provided
                       if (productName.isEmpty ||
                           amountController.text.isEmpty) {
                         Get.snackbar(
@@ -449,6 +527,14 @@ class _UserPagesState extends State<UserPages> {
                           colorText: Colors.white,
                         );
                         return;
+                      }
+                      if (transactionType == 'pabo') {
+                        localisCredit = false;
+                      } else if (transactionType == 'dibo') {
+                        localisCredit = true;
+                      } else if (transactionType == 'paid') {
+                        localisCredit = false;
+                        paidAmount = totalAmount;
                       }
                       additem(
                         data.title,
@@ -477,7 +563,6 @@ class _UserPagesState extends State<UserPages> {
             },
           );
         }
-        ;
       },
     );
   }
