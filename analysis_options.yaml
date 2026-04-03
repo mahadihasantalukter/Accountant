@@ -13,6 +13,7 @@ analyzer:
     unnecessary_brace_in_string_interps: ignore
     curly_braces_in_flow_control_structures: ignore
     deprecated_member_use: ignore
+    prefer_typing_uninitialized_variables: ignore
 include: package:flutter_lints/flutter.yaml
 
 linter:

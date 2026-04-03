@@ -23,6 +23,7 @@ class _UserPagesState extends State<UserPages> {
   void additem(
     String title,
     String productname,
+    String note,
     double totalamount,
     double paidamountin,
     bool isCredita,
@@ -30,6 +31,7 @@ class _UserPagesState extends State<UserPages> {
     final newentery = Customer(
       title: title,
       productname: productname,
+      note: note,
       amounta: totalamount,
       paidamount: paidamountin,
       isCradit: isCredita,
@@ -544,6 +546,7 @@ class _UserPagesState extends State<UserPages> {
                       additem(
                         data.title,
                         productName,
+                        note,
                         totalAmount,
                         paidAmount,
                         localisCredit,
@@ -553,13 +556,7 @@ class _UserPagesState extends State<UserPages> {
                       Get.back();
 
                       // 6. Optional: Show success message
-                      Get.snackbar(
-                        "সফল",
-                        "নতুন লেনদেন যোগ করা হয়েছে",
-                        snackPosition: SnackPosition.BOTTOM,
-                        backgroundColor: Colors.green,
-                        colorText: Colors.white,
-                      );
+                      
                     },
                     child: const Text("যোগ করুন"),
                   ),

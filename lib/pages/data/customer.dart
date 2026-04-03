@@ -3,6 +3,7 @@ import 'package:hive/hive.dart';
 class Customer extends HiveObject {
   String title;
   String productname;
+  var note;
   double amounta;
   double paidamount;
   bool isCradit;
@@ -10,6 +11,7 @@ class Customer extends HiveObject {
   Customer({
     required this.title,
     required this.productname,
+    this.note,
     required this.amounta,
     required this.paidamount,
     required this.isCradit,
@@ -25,12 +27,15 @@ class CustomerAdapter extends TypeAdapter<Customer> {
   Customer read(BinaryReader reader) {
     // READ ORDER MUST MATCH WRITE ORDER EXACTLY
     return Customer(
-      title: reader.read() as String,               // Index 0
-      productname: reader.read() as String,         // Index 1
-      amounta: (reader.read() as num).toDouble(),    // Index 2 (Safe double cast)
-      paidamount: (reader.read() as num).toDouble(),// Index 3 (Safe double cast)
-      isCradit: reader.read() as bool,              // Index 4
-      date: DateTime.fromMillisecondsSinceEpoch(    // Index 5
+      title: reader.read() as String, 
+      productname: reader.read() as String, 
+      note: reader.read(),
+      amounta: (reader.read() as num).toDouble(), 
+      paidamount:
+          (reader.read() as num).toDouble(),
+      isCradit: reader.read() as bool, 
+      date: DateTime.fromMillisecondsSinceEpoch(
+        // Index 5
         reader.read() as int,
       ),
     );
@@ -38,11 +43,12 @@ class CustomerAdapter extends TypeAdapter<Customer> {
 
   @override
   void write(BinaryWriter writer, Customer obj) {
-    writer.write(obj.title);                        // Index 0
-    writer.write(obj.productname);                  // Index 1
-    writer.write(obj.amounta);                       // Index 2
-    writer.write(obj.paidamount);                   // Index 3
-    writer.write(obj.isCradit);                     // Index 4
-    writer.write(obj.date.millisecondsSinceEpoch);  // Index 5
+    writer.write(obj.title); 
+    writer.write(obj.productname);
+    writer.write(obj.note); 
+    writer.write(obj.amounta); 
+    writer.write(obj.paidamount); 
+    writer.write(obj.isCradit); 
+    writer.write(obj.date.millisecondsSinceEpoch); 
   }
 }
