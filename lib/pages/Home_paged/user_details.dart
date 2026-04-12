@@ -65,7 +65,9 @@ class _UserDetailsState extends State<UserDetails> {
         ),
         actions: [
           TextButton(
-            onPressed: () {},
+            onPressed: () {
+              showEditeCustomer(context, data2, data);
+            },
             style: TextButton.styleFrom(
               padding: EdgeInsets.symmetric(horizontal: 10),
               minimumSize: Size.zero,
@@ -79,7 +81,9 @@ class _UserDetailsState extends State<UserDetails> {
             ),
           ),
           TextButton(
-            onPressed: () {},
+            onPressed: () {
+              deletecoustomer(context, data2, data);
+            },
             style: TextButton.styleFrom(
               padding: EdgeInsets.symmetric(horizontal: 10),
               minimumSize: Size.zero,
@@ -263,4 +267,235 @@ class _UserDetailsState extends State<UserDetails> {
       ),
     );
   }
+}
+
+void deletecoustomer(BuildContext context, Customer data2, Transaction data) {
+  showDialog(
+    context: context,
+    builder:
+        (context) => AlertDialog(
+          title: Center(
+            child: Text(
+              "কাস্টমারটি কি মুছে ফেলতে চান?",
+              style: TextStyle(color: Colors.black, fontSize: 16),
+            ),
+          ),
+          content: Text(
+            "${data2.title} এর কাস্টমারটি কি মুছে ফেলতে চান?",
+            style: TextStyle(color: Colors.black, fontSize: 16),
+          ),
+          actions: [
+            ElevatedButton(
+              onPressed: () => Get.back(),
+              child: Text("না", style: TextStyle(color: Colors.black)),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                await data2.delete();
+                Get.offAll(() => UserPages(transaction: data));
+              },
+              child: Text("হ্যাঁ", style: TextStyle(color: Colors.black)),
+            ),
+          ],
+        ),
+  );
+}
+
+void showEditeCustomer(BuildContext context, Customer data2, Transaction data) {
+  final productnameController = TextEditingController(text: data2.productname);
+  final phoneController = TextEditingController(
+    text: data.phonenumber.toString(),
+  );
+  final amountController = TextEditingController(
+    text: data2.amounta.toString(),
+  );
+  final noteController = TextEditingController(text: data2.note.toString());
+  final paidamountController = TextEditingController(
+    text: data2.paidamount.toString(),
+  );
+
+  showDialog(
+    context: context,
+    builder:
+        (context) => StatefulBuilder(
+          builder: (context, setState) {
+            double currentAmount = double.tryParse(amountController.text) ?? 0;
+            double currentPaid =
+                double.tryParse(paidamountController.text) ?? 0;
+            double balance = currentAmount - currentPaid;
+
+            return AlertDialog(
+              title: Center(
+                child: Text(
+                  "কাস্টমার পরিবর্তন করুন",
+                  style: TextStyle(color: Colors.black, fontSize: 16),
+                ),
+              ),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: productnameController,
+
+                      decoration: InputDecoration(
+                        labelText: "পণ্যের নাম",
+
+                        fillColor: Colors.white54,
+
+                        hintStyle: TextStyle(color: Colors.black),
+
+                        prefixIcon: Icon(
+                          Icons.production_quantity_limits,
+
+                          color: Colors.black,
+                        ),
+
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 24,
+
+                          vertical: 16,
+                        ),
+                      ),
+                    ),
+
+                    SizedBox(height: 10),
+
+                    TextField(
+                      controller: phoneController,
+
+                      decoration: InputDecoration(
+                        labelText: "কাস্টমারের ফোন নাম্বার",
+
+                        fillColor: Colors.white54,
+
+                        hintStyle: TextStyle(color: Colors.black),
+
+                        prefixIcon: Icon(
+                          Icons.phone_android_outlined,
+
+                          color: Colors.black,
+                        ),
+
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 24,
+
+                          vertical: 16,
+                        ),
+                      ),
+                    ),
+
+                    SizedBox(height: 10),
+                    TextField(
+                      controller: noteController,
+
+                      decoration: InputDecoration(
+                        labelText: "নোট",
+
+                        fillColor: Colors.white54,
+
+                        hintStyle: TextStyle(color: Colors.black),
+
+                        prefixIcon: Icon(
+                          Icons.note_add_outlined,
+
+                          color: Colors.black,
+                        ),
+
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 24,
+
+                          vertical: 16,
+                        ),
+                      ),
+                    ),
+
+                    SizedBox(height: 10),
+                    TextField(
+                      controller: amountController,
+                      keyboardType: TextInputType.number,
+                      onChanged:
+                          (value) =>
+                              setState(() {}), // টাইপ করলে লেবেল চেঞ্জ হবে
+                      decoration: InputDecoration(
+                        labelText: "টাকা",
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    TextField(
+                      controller: paidamountController,
+                      keyboardType: TextInputType.number,
+                      onChanged: (value) => setState(() {}),
+                      decoration: InputDecoration(
+                        labelText:
+                            balance == 0
+                                ? "পরিশোধ"
+                                : (balance > 0
+                                    ? "মোট পাবো $balance"
+                                    : "মোট পাবে ${balance.abs()}"),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                ElevatedButton(
+                  onPressed: () => Get.back(),
+                  child: Text("বাতিল"),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    try {
+                      data2.productname = productnameController.text;
+                      data2.amounta =
+                          double.tryParse(amountController.text) ??
+                          data2.amounta;
+                      data2.note = noteController.text;
+                      data2.paidamount =
+                          double.tryParse(paidamountController.text) ??
+                          data2.paidamount;
+
+                      data.phonenumber =
+                          int.tryParse(phoneController.text) ??
+                          data.phonenumber;
+
+                      await data2.save();
+
+                      await data.save();
+
+                      Get.back();
+                      Get.snackbar(
+                        "সফল",
+                        "ডাটা আপডেট হয়েছে",
+                        snackPosition: SnackPosition.BOTTOM,
+                      );
+                    } catch (e) {
+                      print("Error: $e");
+                    }
+                  },
+                  child: Text("আপডেট"),
+                ),
+              ],
+            );
+          },
+        ),
+  );
 }

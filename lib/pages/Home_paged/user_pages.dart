@@ -468,7 +468,7 @@ class _UserPagesState extends State<UserPages> {
                           });
                         },
                         style: ButtonStyle(
-                          // ব্যাকগ্রাউন্ড কালার পরিবর্তন
+                          
                           backgroundColor: WidgetStateProperty.resolveWith<
                             Color
                           >((states) {
@@ -478,10 +478,10 @@ class _UserPagesState extends State<UserPages> {
                                 return Colors.green;
                               if (transactionType == 'paid') return Colors.blue;
                             }
-                            return Colors.white; // ডিফল্ট সাদা
+                            return Colors.white; 
                           }),
 
-                          // টেক্সট এবং আইকন কালার (ForegroundColor)
+                          
                           foregroundColor:
                               WidgetStateProperty.resolveWith<Color>((states) {
                                 if (states.contains(WidgetState.selected)) {
